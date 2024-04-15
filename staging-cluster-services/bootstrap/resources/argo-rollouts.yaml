@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argo-rollouts
+spec:
+  template:
+    metadata:
+      name: "{{ cluster }}-argo-rollouts"
+    spec:
+      project: staging-cluster-services-application-set
+      destination:
+        namespace: argo-rollouts
+        server: https://kubernetes.default.svc
+      source:
+        path: staging-cluster-services/argo-rollouts/base
+        repoURL: git@github.com:Osazz/argocd_projects.git
+        targetRevision: master
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+      ignoreDifferences:
+        - group: apiextensions.k8s.io
+          kind: CustomResourceDefinition
+          jsonPointers:
+            - /spec/preserveUnknownFields

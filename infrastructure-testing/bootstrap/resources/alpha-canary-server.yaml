@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: alpha-canary
+  namespace: argocd
+spec:
+  template:
+    metadata:
+      name: '{{ cluster }}-alpha-canary'
+    spec:
+      project: infrastructure-testing
+      destination:
+        server: '{{ url }}'
+        namespace: alpha-canary
+      source:
+        path: 'infrastructure-testing/alpha-canary/resources'
+        repoURL: git@github.com:Osazz/argocd_projects.git
+        targetRevision: master
+      syncPolicy:
+        automated:
+          prune: true
+        syncOptions:
+          - Replace=true
+          - CreateNamespace=true

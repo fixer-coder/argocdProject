@@ -1,0 +1,68 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istiocontrolplane-1-16-0
+  namespace: istio-system
+spec:
+  profile: minimal
+  revision: 1-16-0
+  defaultRevision: true
+  meshConfig:
+    extensionProviders:
+    - name: "oauth2-proxy"
+      envoyExtAuthzHttp:
+        service: "oauth2-proxy.nomine.svc.cluster.local"
+        port: "8090"
+        headersToDownstreamOnDeny:
+          - content-type
+          - set-cookie
+        headersToUpstreamOnAllow:
+          - authorization
+          - cookie
+          - path
+        includeRequestHeadersInCheck:
+          - "cookie"
+          - "x-forwarded-access-token"
+    accessLogEncoding: JSON
+    accessLogFile: /dev/stdout
+    enableTracing: true
+    defaultConfig:
+      tracing:
+        sampling: 100
+        zipkin:
+          address: otel-collector-headless.opentelemetry-operator-system.svc.cluster.local:9411
+  components:
+    pilot:
+      k8s:
+        hpaSpec:
+          minReplicas: 2
+    ingressGateways:
+      - name: public-ingressgateway-1-16-0
+        namespace: public-istio-ingress
+        enabled: true
+        label:
+          # Don`t change the label as this will mean we don`t have to create new Gateway and Virtual Services
+          app: public-ingressgateway
+          istio: public-ingressgateway
+          app.beyondtrust.com/tier: tier-1
+          app.beyondtrust.com/team: sre
+        k8s:
+          hpaSpec:
+            maxReplicas: 10
+            minReplicas: 3
+          service:
+            type: ClusterIP
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        # Don`t change the label as this will mean we don`t have to create new Gateway and Virtual Services
+                        service.istio.io/canonical-name: public-ingressgateway
+                    topologyKey: failure-domain.beta.kubernetes.io/zone
+                  weight: 1
+  values:
+    gateways:
+      istio-ingressgateway:
+        injectionTemplate: gateway

@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin-vs
+spec:
+  hosts:
+    - "*"
+# Chris added LB target groupd dns as host
+  # - "k8s-publicis-ingressg-b86b9c4dcc-604283750.us-east-1.elb.amazonaws.com"
+  gateways:
+    - public-istio-ingress/public-https-gateway
+  http:
+    - match:
+      - uri:
+          prefix: /
+      route:
+      - destination:
+          host: httpbin
+          port:
+            number: 8000
+##curl -s http://k8s-publicis-ingressg-b86b9c4dcc-604283750.us-east-1.elb.amazonaws.com/ | grep -o "<title>.*</title>"

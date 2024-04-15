@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: staging-cluster-services-application-set
+  namespace: argocd
+spec:
+  description: "Cluster wide services for helping engineering tools level up"
+
+  sourceRepos:
+    - git@github.com:Osazz/argocd_projects.git
+
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  destinations:
+    - namespace: istio-operator
+      server: https://kubernetes.default.svc
+    - namespace: istio-system
+      server: https://kubernetes.default.svc
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
+    - namespace: argo-rollouts
+      server: https://kubernetes.default.svc
+    - namespace: cert-manager
+      server: https://kubernetes.default.svc
+    - namespace: public-istio-ingress
+      server: https://kubernetes.default.svc
+    - namespace: private-istio-ingress
+      server: https://kubernetes.default.svc
+    - namespace: datadog-system
+      server: https://kubernetes.default.svc
+

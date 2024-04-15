@@ -1,0 +1,158 @@
+####################################################################################################################
+## This is the template we will be using to generate manifest from istioctl, so that our changes can be
+## applied to the Ingress Gateways.
+##
+## If we want to add more customizations or more IngressGateways, we can do that here and run:
+##
+## `istioctl manifest generate --filename template/istiocontrolplane-template.yaml > istiocontrolplane-1-15-0.yaml`
+##
+## This is not referenced in any kustomization file as we are not installing it
+####################################################################################################################
+
+---
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istiocontrolplane-1-15-0
+  namespace: istio-system
+spec:
+  profile: empty
+  revision: 1-15-0
+  components:
+    ingressGateways:
+      # The event ingestion gateway, fronted by an AWS ALB, and is the first
+      # point of entry for all traffic meant for the ingestion services
+      # enters the EKS cluster.
+      - name: ingest-ingressgateway-1-15-0
+        namespace: public-istio-ingress
+        enabled: true
+        label:
+          app: ingest-ingressgateway
+          istio: ingest-ingressgateway
+          app.beyondtrust.com/tier: tier-1
+          app.beyondtrust.com/team: sre
+        k8s:
+          hpaSpec:
+            maxReplicas: 10
+            minReplicas: 3
+          service:
+            type: ClusterIP
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        service.istio.io/canonical-name: ingest-ingressgateway
+                    topologyKey: failure-domain.beta.kubernetes.io/zone
+                  weight: 1
+        # The publicly facing services gateway, which is also fronted by
+        # an application load balancer. Any traffic meant for the existing
+        # CSM/CBP services will be handled by this entry point into the
+        # EKS cluster.
+      - name: public-ingressgateway-1-15-0
+        namespace: public-istio-ingress
+        enabled: true
+        label:
+          app: public-ingressgateway
+          istio: public-ingressgateway
+          app.beyondtrust.com/tier: tier-1
+          app.beyondtrust.com/team: sre
+        k8s:
+          hpaSpec:
+            maxReplicas: 10
+            minReplicas: 3
+          service:
+            type: ClusterIP
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        service.istio.io/canonical-name: public-ingressgateway
+                    topologyKey: failure-domain.beta.kubernetes.io/zone
+                  weight: 1
+        # The publicly facing login services gateway, which is also fronted
+        # by an application load balancer. Any traffic meant for the existing
+        # Nomine services will be handled by this entry point into the
+        # EKS cluster.
+      - name: login-ingressgateway-1-15-0
+        namespace: public-istio-ingress
+        enabled: true
+        label:
+          app: login-ingressgateway
+          istio: login-ingressgateway
+          app.beyondtrust.com/tier: tier-1
+          app.beyondtrust.com/team: sre
+        k8s:
+          hpaSpec:
+            maxReplicas: 10
+            minReplicas: 3
+          service:
+            type: ClusterIP
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        service.istio.io/canonical-name: login-ingressgateway
+                    topologyKey: failure-domain.beta.kubernetes.io/zone
+                  weight: 1
+        # The publicly facing login services gateway, which is also fronted
+        # by an application load balancer. Any traffic meant for the existing
+        # Nomine services will be handled by this entry point into the
+        # EKS cluster.
+      - name: console-ingressgateway-1-15-0
+        namespace: public-istio-ingress
+        enabled: true
+        label:
+          app: console-ingressgateway
+          istio: console-ingressgateway
+          app.beyondtrust.com/tier: tier-1
+          app.beyondtrust.com/team: sre
+        k8s:
+          hpaSpec:
+            maxReplicas: 10
+            minReplicas: 3
+          service:
+            type: ClusterIP
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        service.istio.io/canonical-name: console-ingressgateway
+                    topologyKey: failure-domain.beta.kubernetes.io/zone
+                  weight: 1
+        # This is the secure gateway entry point for those apps that make use
+        # of completely end-to-end encryption.
+      - name: secure-app-gateway-controller-1-15-0
+        namespace: private-istio-ingress
+        enabled: true
+        label:
+          app: secure-app-gateway-controller
+          istio: secure-app-gateway-controller
+          app.beyondtrust.com/tier: tier-1
+          app.beyondtrust.com/team: sre
+        k8s:
+          hpaSpec:
+            maxReplicas: 10
+            minReplicas: 3
+          service:
+            type: ClusterIP
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        service.istio.io/canonical-name: secure-app-gateway-controller
+                    topologyKey: failure-domain.beta.kubernetes.io/zone
+                  weight: 1
+  values:
+    gateways:
+      istio-ingressgateway:
+        injectionTemplate: gateway

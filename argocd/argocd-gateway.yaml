@@ -1,0 +1,68 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: argocd-gateway
+  namespace: public-istio-ingress
+spec:
+  selector:
+    service.istio.io/canonical-name: public-ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+#      tls:
+#        httpsRedirect: true
+#      hosts:
+#        - "argocd-dev.example.com"
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: PASSTHROUGH
+      hosts:
+        - "argocd-dev.example.com"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - argocd-gateway
+  tls:
+    - match:
+#        - port: 443
+#          sniHosts:
+#            - argocd-dev.example.com
+      route:
+        - destination:
+            host: argocd-server.argocd.svc.cluster.local
+            port:
+              number: 443
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  name: argocd-ingress-test
+  namespace: public-istio-ingress
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: public-ingressgateway-1-15-0
+                port:
+                  name: http2
+            path: /
+            pathType: Prefix

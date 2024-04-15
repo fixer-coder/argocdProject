@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure-testing
+  namespace: argocd
+spec:
+  description: "App for testing space"
+  sourceRepos:
+    - git@github.com:Osazz/argocd_projects.git
+
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  destinations:
+    - namespace: alpha-canary
+      server: https://kubernetes.default.svc
+    - namespace: book-app
+      server: https://kubernetes.default.svc
+    - namespace: helloworld
+      server: https://kubernetes.default.svc
+    - namespace: httpbin
+      server: https://kubernetes.default.svc
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc

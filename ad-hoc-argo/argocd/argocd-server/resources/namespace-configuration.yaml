@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: namespace-configuration
+  namespace: argocd
+spec:
+  description: "Base level configuration for namespaces"
+  sourceRepos:
+  - git@github.com:fixer-coder/argocdProject.git
+  destinations:
+  - namespace: '*'
+    server: '*'
+  namespaceResourceWhitelist:
+  - group: ''
+    kind: 'LimitRange'
+  - group: ''
+    kind: 'ResourceQuota'
+  - group: 'networking.k8s.io'
+    kind: 'NetworkPolicy'
+  orphanedResources:
+    warn: false
+  clusterResourceWhitelist:
+  - group: ''
+    kind: 'Namespace'

@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - resources/staging-cluster-services-proj.yaml
+  - resources/infrastructure-testing-project.yaml
+  - resources/sealed-secrets.yaml
+  - resources/cert-manager.yaml
+  - resources/istio-system.yaml
+  - resources/argo-rollouts.yaml
+  - resources/infrastructure-testing.yaml
+#  - resources/helloworld.yaml
+#  - resources/argocd.yaml
+
+
+
+patches:
+  - path: "cluster-generator.yaml"
+    target:
+      group: "argoproj.io"
+      version: "v1alpha1"
+      kind: "ApplicationSet"
+

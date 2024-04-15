@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: alpha-canary
+spec:
+  hosts:
+    - "*"
+#    - "deji-test.bt-dragon-test.net"
+  gateways:
+    - public-istio-ingress/public-https-gateway
+  http:
+    - match:
+      - uri:
+          prefix: /
+      route:
+      - destination:
+          host: nginx

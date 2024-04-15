@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bootstrap-staging-cluster-services
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: argocd
+  source:
+    path: staging-cluster-services/bootstrap
+    repoURL: git@github.com:fixer-coder/argocdProject.git
+    targetRevision: master

@@ -1,0 +1,13 @@
+# NOTE(elowry): ideally we would just be able to use the cluster
+# generator built in to applicationset. However, it does not currently
+# work with EKS clusters due to name constraints
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: placeholder-name-for-strategic-merge
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: staging
+            url: https://kubernetes.default.svc

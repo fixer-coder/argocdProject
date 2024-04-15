@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: istio-control-plane-1-16-0
+  namespace: argocd
+spec:
+  template:
+    metadata:
+      name: 'istio-control-plane-1-16-0'
+      annotations:
+        argocd.argoproj.io/sync-wave: "-1"
+    spec:
+      project: staging-cluster-services-application-set
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: istio-system
+      source:
+        path: 'staging-cluster-services/istio-system/no-operator-control-plane/1-16-0'
+        repoURL: git@github.com:Osazz/argocd_projects.git
+        targetRevision: master

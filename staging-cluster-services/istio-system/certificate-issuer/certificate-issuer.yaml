@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: istio-gateway-issuer-public
+  namespace: public-istio-ingress
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: istio-gateway-issuer-private
+  namespace: private-istio-ingress
+spec:
+  selfSigned: {}

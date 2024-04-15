@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: httpbin
+
+commonLabels:
+  app.kubernetes.io/name: httpbin
+  app.kubernetes.io/component: server
+  app.kubernetes.io/part-of: infrastructure-testing
+  app.beyondtrust.com/team: sre
+  app.beyondtrust.com/tier: tier-4
+
+
+resources:
+  - resources/namespace.yaml
+  - resources/serviceaccount.yaml
+  - resources/deployment.yaml
+  - resources/service.yaml
+#  - resources/httpbin-vs.yaml

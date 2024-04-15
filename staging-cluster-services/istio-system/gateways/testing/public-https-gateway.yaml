@@ -1,0 +1,116 @@
+#apiVersion: cert-manager.io/v1
+#kind: Certificate
+#metadata:
+#  name: test-https-gateway-ingress-cert
+#  namespace: public-istio-ingress
+#spec:
+#  secretName: test-https-gateway-ingress-cert
+#  commonName: "deji-test.bt-dragon-test.net"
+#  dnsNames:
+#    - "deji-test.bt-dragon-test.net"
+#  issuerRef:
+#    name: istio-gateway-issuer-public
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: public-ingressgateway
+#  namespace: public-istio-ingress
+#  annotations:
+#    alb.ingress.kubernetes.io/scheme: internet-facing
+#    alb.ingress.kubernetes.io/target-type: ip
+#    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01
+#    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+##    alb.ingress.kubernetes.io/ssl-redirect: '443'
+#    alb.ingress.kubernetes.io/backend-protocol: HTTP
+#
+##    alb.ingress.kubernetes.io/backend-protocol: HTTP
+##    alb.ingress.kubernetes.io/healthcheck-path: /healthz/ready
+##    alb.ingress.kubernetes.io/healthcheck-port: '15021'
+##    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+##    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":443}]'
+##    alb.ingress.kubernetes.io/ssl-redirect: "443"
+##    alb.ingress.kubernetes.io/group.name: sre.deji-test
+###    external-dns.alpha.kubernetes.io/hostname: deji-test.bt-dragon-test.net
+##    alb.ingress.kubernetes.io/actions.forward-multiple-tg: |
+##      {
+##        "type":"forward",
+##        "forwardConfig":{
+##          "targetGroups":[
+##            {
+##              "serviceName":"public-ingressgateway-1-15-0",
+##              "servicePort":"https",
+##              "weight":100
+##            }
+##          ]
+##        }
+##      }
+#spec:
+#  ingressClassName: alb
+#  rules:
+#  - host: deji-test.bt-dragon-test.net
+#  - http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: public-ingressgateway-1-15-0
+#            port:
+#              name: http2
+#---
+#apiVersion: networking.istio.io/v1beta1
+#kind: Gateway
+#metadata:
+#  name: public-https-gateway
+#  namespace: public-istio-ingress
+#spec:
+#  selector:
+#    service.istio.io/canonical-name: public-ingressgateway
+#  servers:
+#    - port:
+#        number: 80
+#        name: public-http
+#        protocol: HTTP
+#      hosts:
+#        - "*"
+#      tls:
+#        mode: SIMPLE
+#        credentialName: test-https-gateway-ingress-cert
+#---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  name: argocd-ingress
+  namespace: public-istio-ingress
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: public-ingressgateway-1-15-0
+                port:
+                  name: http2
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: argocd-https-gateway
+  namespace: public-istio-ingress
+spec:
+  selector:
+    service.istio.io/canonical-name: public-ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: argocd-http
+        protocol: HTTP
+      hosts:
+        - "*"

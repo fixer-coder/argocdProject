@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: istio-gateways
+  namespace: argocd
+spec:
+  template:
+    metadata:
+      name: 'testing-istio-gateways'
+    spec:
+      project: staging-cluster-services-application-set
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: istio-system
+      source:
+        path: 'staging-cluster-services/istio-system/gateways/testing'
+        repoURL: git@github.com:Osazz/argocd_projects.git
+        targetRevision: master
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

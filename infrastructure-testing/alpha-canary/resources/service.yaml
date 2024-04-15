@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: alpha-canary
+  labels:
+    app: nginx
+spec:
+  ports:
+    - port: 80
+      targetPort: nginx-http
+      protocol: TCP
+      name: http
+  selector:
+    app: nginx

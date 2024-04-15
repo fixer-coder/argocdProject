@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: alpha-canary-rollout
+  namespace: alpha-canary
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  restartAt: 2022-10-13T14:58:25Z
+  strategy:
+    canary:
+      steps:
+        - setWeight: 25
+        - pause:
+            duration: 1m
+        - setWeight: 75
+        - pause:
+            duration: 1m
+  workloadRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: alpha-canary

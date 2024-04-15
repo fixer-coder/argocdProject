@@ -1,0 +1,1220 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: console-ingressgateway-1-15-0-service-account
+  namespace: public-istio-ingress
+  labels:
+    app: console-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: console-ingressgateway
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ingest-ingressgateway-1-15-0-service-account
+  namespace: public-istio-ingress
+  labels:
+    app: ingest-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: ingest-ingressgateway
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: login-ingressgateway-1-15-0-service-account
+  namespace: public-istio-ingress
+  labels:
+    app: login-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: login-ingressgateway
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: public-ingressgateway-1-15-0-service-account
+  namespace: public-istio-ingress
+  labels:
+    app: public-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: public-ingressgateway
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: secure-app-gateway-controller-1-15-0-service-account
+  namespace: private-istio-ingress
+  labels:
+    app: secure-app-gateway-controller
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: secure-app-gateway-controller
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: console-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: console-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: console-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  selector:
+    matchLabels:
+      app: console-ingressgateway
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: console-ingressgateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      annotations:
+        inject.istio.io/templates: gateway
+        prometheus.io/path: /stats/prometheus
+        prometheus.io/port: "15020"
+        prometheus.io/scrape: "true"
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: console-ingressgateway
+        app.beyondtrust.com/team: sre
+        app.beyondtrust.com/tier: tier-1
+        install.operator.istio.io/owning-resource: unknown
+        istio: console-ingressgateway
+        istio.io/rev: 1-15-0
+        operator.istio.io/component: IngressGateways
+        sidecar.istio.io/inject: "true"
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: null
+          requiredDuringSchedulingIgnoredDuringExecution: null
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  service.istio.io/canonical-name: console-ingressgateway
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 1
+      containers:
+      - env:
+        - name: ISTIO_META_UNPRIVILEGED_POD
+          value: "true"
+        image: auto
+        name: istio-proxy
+        ports:
+        - containerPort: 15021
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc/istio/ingressgateway-certs
+          name: ingressgateway-certs
+          readOnly: true
+        - mountPath: /etc/istio/ingressgateway-ca-certs
+          name: ingressgateway-ca-certs
+          readOnly: true
+      securityContext:
+        fsGroup: 1337
+        runAsGroup: 1337
+        runAsNonRoot: true
+        runAsUser: 1337
+      serviceAccountName: console-ingressgateway-1-15-0-service-account
+      volumes:
+      - name: ingressgateway-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-certs
+      - name: ingressgateway-ca-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-ca-certs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ingest-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: ingest-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: ingest-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  selector:
+    matchLabels:
+      app: ingest-ingressgateway
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: ingest-ingressgateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      annotations:
+        inject.istio.io/templates: gateway
+        prometheus.io/path: /stats/prometheus
+        prometheus.io/port: "15020"
+        prometheus.io/scrape: "true"
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: ingest-ingressgateway
+        app.beyondtrust.com/team: sre
+        app.beyondtrust.com/tier: tier-1
+        install.operator.istio.io/owning-resource: unknown
+        istio: ingest-ingressgateway
+        istio.io/rev: 1-15-0
+        operator.istio.io/component: IngressGateways
+        sidecar.istio.io/inject: "true"
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: null
+          requiredDuringSchedulingIgnoredDuringExecution: null
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  service.istio.io/canonical-name: ingest-ingressgateway
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 1
+      containers:
+      - env:
+        - name: ISTIO_META_UNPRIVILEGED_POD
+          value: "true"
+        image: auto
+        name: istio-proxy
+        ports:
+        - containerPort: 15021
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc/istio/ingressgateway-certs
+          name: ingressgateway-certs
+          readOnly: true
+        - mountPath: /etc/istio/ingressgateway-ca-certs
+          name: ingressgateway-ca-certs
+          readOnly: true
+      securityContext:
+        fsGroup: 1337
+        runAsGroup: 1337
+        runAsNonRoot: true
+        runAsUser: 1337
+      serviceAccountName: ingest-ingressgateway-1-15-0-service-account
+      volumes:
+      - name: ingressgateway-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-certs
+      - name: ingressgateway-ca-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-ca-certs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: login-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: login-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: login-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  selector:
+    matchLabels:
+      app: login-ingressgateway
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: login-ingressgateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      annotations:
+        inject.istio.io/templates: gateway
+        prometheus.io/path: /stats/prometheus
+        prometheus.io/port: "15020"
+        prometheus.io/scrape: "true"
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: login-ingressgateway
+        app.beyondtrust.com/team: sre
+        app.beyondtrust.com/tier: tier-1
+        install.operator.istio.io/owning-resource: unknown
+        istio: login-ingressgateway
+        istio.io/rev: 1-15-0
+        operator.istio.io/component: IngressGateways
+        sidecar.istio.io/inject: "true"
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: null
+          requiredDuringSchedulingIgnoredDuringExecution: null
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  service.istio.io/canonical-name: login-ingressgateway
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 1
+      containers:
+      - env:
+        - name: ISTIO_META_UNPRIVILEGED_POD
+          value: "true"
+        image: auto
+        name: istio-proxy
+        ports:
+        - containerPort: 15021
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc/istio/ingressgateway-certs
+          name: ingressgateway-certs
+          readOnly: true
+        - mountPath: /etc/istio/ingressgateway-ca-certs
+          name: ingressgateway-ca-certs
+          readOnly: true
+      securityContext:
+        fsGroup: 1337
+        runAsGroup: 1337
+        runAsNonRoot: true
+        runAsUser: 1337
+      serviceAccountName: login-ingressgateway-1-15-0-service-account
+      volumes:
+      - name: ingressgateway-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-certs
+      - name: ingressgateway-ca-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-ca-certs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: public-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: public-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: public-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  selector:
+    matchLabels:
+      app: public-ingressgateway
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: public-ingressgateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      annotations:
+        inject.istio.io/templates: gateway
+        prometheus.io/path: /stats/prometheus
+        prometheus.io/port: "15020"
+        prometheus.io/scrape: "true"
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: public-ingressgateway
+        app.beyondtrust.com/team: sre
+        app.beyondtrust.com/tier: tier-1
+        install.operator.istio.io/owning-resource: unknown
+        istio: public-ingressgateway
+        istio.io/rev: 1-15-0
+        operator.istio.io/component: IngressGateways
+        sidecar.istio.io/inject: "true"
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: null
+          requiredDuringSchedulingIgnoredDuringExecution: null
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  service.istio.io/canonical-name: public-ingressgateway
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 1
+      containers:
+      - env:
+        - name: ISTIO_META_UNPRIVILEGED_POD
+          value: "true"
+        image: auto
+        name: istio-proxy
+        ports:
+        - containerPort: 15021
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc/istio/ingressgateway-certs
+          name: ingressgateway-certs
+          readOnly: true
+        - mountPath: /etc/istio/ingressgateway-ca-certs
+          name: ingressgateway-ca-certs
+          readOnly: true
+      securityContext:
+        fsGroup: 1337
+        runAsGroup: 1337
+        runAsNonRoot: true
+        runAsUser: 1337
+      serviceAccountName: public-ingressgateway-1-15-0-service-account
+      volumes:
+      - name: ingressgateway-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-certs
+      - name: ingressgateway-ca-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-ca-certs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: secure-app-gateway-controller
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: secure-app-gateway-controller
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: secure-app-gateway-controller-1-15-0
+  namespace: private-istio-ingress
+spec:
+  selector:
+    matchLabels:
+      app: secure-app-gateway-controller
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: secure-app-gateway-controller
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      annotations:
+        inject.istio.io/templates: gateway
+        prometheus.io/path: /stats/prometheus
+        prometheus.io/port: "15020"
+        prometheus.io/scrape: "true"
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: secure-app-gateway-controller
+        app.beyondtrust.com/team: sre
+        app.beyondtrust.com/tier: tier-1
+        install.operator.istio.io/owning-resource: unknown
+        istio: secure-app-gateway-controller
+        istio.io/rev: 1-15-0
+        operator.istio.io/component: IngressGateways
+        sidecar.istio.io/inject: "true"
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: null
+          requiredDuringSchedulingIgnoredDuringExecution: null
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  service.istio.io/canonical-name: secure-app-gateway-controller
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 1
+      containers:
+      - env:
+        - name: ISTIO_META_UNPRIVILEGED_POD
+          value: "true"
+        image: auto
+        name: istio-proxy
+        ports:
+        - containerPort: 15021
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc/istio/ingressgateway-certs
+          name: ingressgateway-certs
+          readOnly: true
+        - mountPath: /etc/istio/ingressgateway-ca-certs
+          name: ingressgateway-ca-certs
+          readOnly: true
+      securityContext:
+        fsGroup: 1337
+        runAsGroup: 1337
+        runAsNonRoot: true
+        runAsUser: 1337
+      serviceAccountName: secure-app-gateway-controller-1-15-0-service-account
+      volumes:
+      - name: ingressgateway-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-certs
+      - name: ingressgateway-ca-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-ca-certs
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: console-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+  labels:
+    app: console-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: console-ingressgateway
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: console-ingressgateway
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: console-ingressgateway
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: ingest-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+  labels:
+    app: ingest-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: ingest-ingressgateway
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ingest-ingressgateway
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: ingest-ingressgateway
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: login-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+  labels:
+    app: login-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: login-ingressgateway
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: login-ingressgateway
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: login-ingressgateway
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: public-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+  labels:
+    app: public-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: public-ingressgateway
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: public-ingressgateway
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: public-ingressgateway
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: secure-app-gateway-controller-1-15-0
+  namespace: private-istio-ingress
+  labels:
+    app: secure-app-gateway-controller
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: secure-app-gateway-controller
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: secure-app-gateway-controller
+      app.beyondtrust.com/team: sre
+      app.beyondtrust.com/tier: tier-1
+      istio: secure-app-gateway-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: console-ingressgateway-1-15-0-sds
+  namespace: public-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ingest-ingressgateway-1-15-0-sds
+  namespace: public-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: login-ingressgateway-1-15-0-sds
+  namespace: public-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: public-ingressgateway-1-15-0-sds
+  namespace: public-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secure-app-gateway-controller-1-15-0-sds
+  namespace: private-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: console-ingressgateway-1-15-0-sds
+  namespace: public-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: console-ingressgateway-1-15-0-sds
+subjects:
+- kind: ServiceAccount
+  name: console-ingressgateway-1-15-0-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ingest-ingressgateway-1-15-0-sds
+  namespace: public-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ingest-ingressgateway-1-15-0-sds
+subjects:
+- kind: ServiceAccount
+  name: ingest-ingressgateway-1-15-0-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: login-ingressgateway-1-15-0-sds
+  namespace: public-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: login-ingressgateway-1-15-0-sds
+subjects:
+- kind: ServiceAccount
+  name: login-ingressgateway-1-15-0-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: public-ingressgateway-1-15-0-sds
+  namespace: public-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: public-ingressgateway-1-15-0-sds
+subjects:
+- kind: ServiceAccount
+  name: public-ingressgateway-1-15-0-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secure-app-gateway-controller-1-15-0-sds
+  namespace: private-istio-ingress
+  labels:
+    release: istio
+    istio.io/rev: 1-15-0
+    install.operator.istio.io/owning-resource: unknown
+    operator.istio.io/component: "IngressGateways"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: secure-app-gateway-controller-1-15-0-sds
+subjects:
+- kind: ServiceAccount
+  name: secure-app-gateway-controller-1-15-0-service-account
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: console-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: console-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: console-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  maxReplicas: 10
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+    type: Resource
+  minReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: console-ingressgateway-1-15-0
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: ingest-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: ingest-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: ingest-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  maxReplicas: 10
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+    type: Resource
+  minReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ingest-ingressgateway-1-15-0
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: login-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: login-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: login-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  maxReplicas: 10
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+    type: Resource
+  minReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: login-ingressgateway-1-15-0
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: public-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: public-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: public-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  maxReplicas: 10
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+    type: Resource
+  minReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: public-ingressgateway-1-15-0
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: secure-app-gateway-controller
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: secure-app-gateway-controller
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: secure-app-gateway-controller-1-15-0
+  namespace: private-istio-ingress
+spec:
+  maxReplicas: 10
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+    type: Resource
+  minReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: secure-app-gateway-controller-1-15-0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: null
+  labels:
+    app: console-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: console-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: console-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http2
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: console-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: console-ingressgateway
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: null
+  labels:
+    app: ingest-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: ingest-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: ingest-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http2
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: ingest-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: ingest-ingressgateway
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: null
+  labels:
+    app: login-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: login-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: login-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http2
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: login-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: login-ingressgateway
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: null
+  labels:
+    app: public-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: public-ingressgateway
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: public-ingressgateway-1-15-0
+  namespace: public-istio-ingress
+spec:
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http2
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: public-ingressgateway
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: public-ingressgateway
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: null
+  labels:
+    app: secure-app-gateway-controller
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    install.operator.istio.io/owning-resource: unknown
+    istio: secure-app-gateway-controller
+    istio.io/rev: 1-15-0
+    operator.istio.io/component: IngressGateways
+    release: istio
+  name: secure-app-gateway-controller-1-15-0
+  namespace: private-istio-ingress
+spec:
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http2
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: secure-app-gateway-controller
+    app.beyondtrust.com/team: sre
+    app.beyondtrust.com/tier: tier-1
+    istio: secure-app-gateway-controller
+  type: ClusterIP
+---

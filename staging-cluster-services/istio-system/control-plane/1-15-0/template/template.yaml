@@ -1,0 +1,30 @@
+####################################################################################################################
+## This is the template we will be using to generate manifest from istioctl, so that our changes can be
+## applied to the control plane.
+##
+## If we want to add more customizations, we can do that here and run:
+##
+## `istioctl manifest generate --filename template/template.yaml > istiocontrolplane.yaml`
+##
+## This is not referenced in any kustomization file as we are not installing it
+####################################################################################################################
+
+---
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istiocontrolplane-1-15-0
+  namespace: istio-system
+spec:
+  profile: minimal
+  revision: 1-15-0
+  defaultRevision: true
+  meshConfig:
+    accessLogEncoding: JSON
+    accessLogFile: /dev/stdout
+    enableTracing: true
+    defaultConfig:
+      tracing:
+        sampling: 100
+        zipkin:
+          address: otel-collector-headless.opentelemetry-operator-system.svc.cluster.local:9411

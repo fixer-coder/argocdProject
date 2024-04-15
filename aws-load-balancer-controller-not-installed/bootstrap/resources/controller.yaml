@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: aws-lb-controller
+  namespace: argocd
+spec:
+  template:
+    metadata:
+      name: '{{ cluster }}-aws-lb-controller'
+    spec:
+      project: infrastructure-testing
+      destination:
+        server: '{{ url }}'
+        namespace: kube-system
+      source:
+        path: 'aws-load-balancer-controller/app'
+        repoURL: git@github.com:Osazz/argocd_projects.git
+        targetRevision: master
