@@ -14,5 +14,5 @@ spec:
         namespace: kube-system
       source:
         path: 'aws-load-balancer-controller/app'
-        repoURL: git@github.com:Osazz/argocd_projects.git
+        repoURL: git@github.com:fixer-coder/argocdProject.git
         targetRevision: master

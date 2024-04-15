@@ -14,5 +14,5 @@ spec:
         namespace: httpbin
       source:
         path: 'httpbin/app'
-        repoURL: git@github.com:Osazz/argocd_projects.git
+        repoURL: git@github.com:fixer-coder/argocdProject.git
         targetRevision: master

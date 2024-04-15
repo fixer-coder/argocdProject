@@ -16,5 +16,5 @@ spec:
         namespace: istio-system
       source:
         path: 'staging-cluster-services/istio-system/configurations'
-        repoURL: git@github.com:Osazz/argocd_projects.git
+        repoURL: git@github.com:fixer-coder/argocdProject.git
         targetRevision: master

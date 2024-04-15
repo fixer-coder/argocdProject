@@ -14,7 +14,7 @@ spec:
         namespace: alpha-canary
       source:
         path: 'infrastructure-testing/alpha-canary/resources'
-        repoURL: git@github.com:Osazz/argocd_projects.git
+        repoURL: git@github.com:fixer-coder/argocdProject.git
         targetRevision: master
       syncPolicy:
         automated:

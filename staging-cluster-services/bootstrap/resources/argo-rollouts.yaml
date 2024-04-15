@@ -13,7 +13,7 @@ spec:
         server: https://kubernetes.default.svc
       source:
         path: staging-cluster-services/argo-rollouts/base
-        repoURL: git@github.com:Osazz/argocd_projects.git
+        repoURL: git@github.com:fixer-coder/argocdProject.git
         targetRevision: master
       syncPolicy:
         automated:

@@ -7,7 +7,7 @@ spec:
   description: "Cluster wide services for helping engineering tools level up"
 
   sourceRepos:
-    - git@github.com:Osazz/argocd_projects.git
+    - git@github.com:fixer-coder/argocdProject.git
 
   clusterResourceWhitelist:
     - group: "*"

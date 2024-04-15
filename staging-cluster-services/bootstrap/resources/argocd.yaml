@@ -10,5 +10,5 @@ spec:
   project: argocd
   source:
     path: argocd
-    repoURL: git@github.com:Osazz/argocd_projects.git
+    repoURL: git@github.com:fixer-coder/argocdProject.git
     targetRevision: master
