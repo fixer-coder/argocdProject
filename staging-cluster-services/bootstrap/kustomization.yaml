@@ -6,7 +6,7 @@ resources:
   - resources/infrastructure-testing-project.yaml
   - resources/sealed-secrets.yaml
   - resources/cert-manager.yaml
-  - resources/istio-system.yaml
+#  - resources/istio-system.yaml
   - resources/argo-rollouts.yaml
   - resources/infrastructure-testing.yaml
 #  - resources/helloworld.yaml

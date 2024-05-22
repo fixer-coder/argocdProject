@@ -4,7 +4,7 @@ metadata:
   name: argocd
   namespace: argocd
   labels:
-    argo.beyondtrust.com/deployment-environment: staging-tooling
+    argo.testing.com/deployment-environment: staging-tooling
 spec:
   description: "App of App bootstraps for ArgoCD"
   sourceRepos:
