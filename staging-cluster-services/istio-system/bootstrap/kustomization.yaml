@@ -5,10 +5,10 @@ resources:
   - resources/namespace-configuration.yaml
   - resources/gateways.yaml
   - resources/certificate-issuer.yaml
-  - resources/control-plane-tag.yaml
-  - resources/control-plane-1-15-0.yaml
-  - resources/ingress-gateway.yaml
-  - resources/control-plane-1-16-0.yaml
+#  - resources/control-plane-tag.yaml
+  - resources/control-plane-1-22-0.yaml
+#  - resources/ingress-gateway.yaml
+#  - resources/control-plane-1-16-0.yaml
 
 
 patches:

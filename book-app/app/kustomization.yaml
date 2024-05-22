@@ -16,4 +16,4 @@ resources:
   - resources/deployment.yaml
   - resources/service.yaml
   - resources/service_account.yaml
-  - resources/bookinfo-gateway.yaml
+#  - resources/bookinfo-gateway.yaml
