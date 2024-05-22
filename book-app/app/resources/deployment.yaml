@@ -32,205 +32,146 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: details-v1
+  name: reviews-v1
   labels:
-    app: details
+    app: reviews
     version: v1
 spec:
-  revisionHistoryLimit: 1
   replicas: 1
   selector:
     matchLabels:
-      app: details
+      app: reviews
       version: v1
   template:
     metadata:
       labels:
-        app: details
+        app: reviews
         version: v1
     spec:
-      serviceAccountName: bookinfo-details
+      serviceAccountName: bookinfo-reviews
       containers:
-        - name: details
-          image: docker.io/istio/examples-bookinfo-details-v1:1.16.4
+        - name: reviews
+          image: docker.io/istio/examples-bookinfo-reviews-v1:1.19.1
           imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_DIR
+              value: "/tmp/logs"
           ports:
             - containerPort: 9080
-          securityContext:
-            runAsUser: 1000
-
-##################################################################################################
-# Ratings Deployment
-##################################################################################################
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: wlp-output
+              mountPath: /opt/ibm/wlp/output
+      volumes:
+        - name: wlp-output
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ratings-v1
+  name: reviews-v2
   labels:
-    app: ratings
-    version: v1
+    app: reviews
+    version: v2
 spec:
-  revisionHistoryLimit: 1
   replicas: 1
   selector:
     matchLabels:
-      app: ratings
-      version: v1
+      app: reviews
+      version: v2
   template:
     metadata:
       labels:
-        app: ratings
-        version: v1
+        app: reviews
+        version: v2
     spec:
-      serviceAccountName: bookinfo-ratings
+      serviceAccountName: bookinfo-reviews
       containers:
-        - name: ratings
-          image: docker.io/istio/examples-bookinfo-ratings-v1:1.16.4
+        - name: reviews
+          image: docker.io/istio/examples-bookinfo-reviews-v2:1.19.1
           imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_DIR
+              value: "/tmp/logs"
           ports:
             - containerPort: 9080
-          securityContext:
-            runAsUser: 1000
-
-##################################################################################################
-# reviews Deployment
-##################################################################################################
-
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: wlp-output
+              mountPath: /opt/ibm/wlp/output
+      volumes:
+        - name: wlp-output
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-   name: reviews-v1
-   labels:
-     app: reviews
-     version: v1
+  name: reviews-v3
+  labels:
+    app: reviews
+    version: v3
 spec:
-   revisionHistoryLimit: 1
-   replicas: 1
-   selector:
-     matchLabels:
-       app: reviews
-       version: v1
-   template:
-     metadata:
-       labels:
-         app: reviews
-         version: v1
-     spec:
-       serviceAccountName: bookinfo-reviews
-       containers:
-         - name: reviews
-           image: docker.io/istio/examples-bookinfo-reviews-v1:1.16.4
-           imagePullPolicy: IfNotPresent
-           env:
-             - name: LOG_DIR
-               value: "/tmp/logs"
-           ports:
-             - containerPort: 9080
-           volumeMounts:
-             - name: tmp
-               mountPath: /tmp
-             - name: wlp-output
-               mountPath: /opt/ibm/wlp/output
-           securityContext:
-             runAsUser: 1000
-       volumes:
-         - name: wlp-output
-           emptyDir: {}
-         - name: tmp
-           emptyDir: {}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reviews
+      version: v3
+  template:
+    metadata:
+      labels:
+        app: reviews
+        version: v3
+    spec:
+      serviceAccountName: bookinfo-reviews
+      containers:
+        - name: reviews
+          image: docker.io/istio/examples-bookinfo-reviews-v3:1.19.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_DIR
+              value: "/tmp/logs"
+          ports:
+            - containerPort: 9080
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: wlp-output
+              mountPath: /opt/ibm/wlp/output
+      volumes:
+        - name: wlp-output
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
 ---
-apiVersion: apps/v1
-kind: Deployment
+##################################################################################################
+# Productpage services
+##################################################################################################
+apiVersion: v1
+kind: Service
 metadata:
-   name: reviews-v2
-   labels:
-     app: reviews
-     version: v2
+  name: productpage
+  labels:
+    app: productpage
+    service: productpage
 spec:
-   revisionHistoryLimit: 1
-   replicas: 1
-   selector:
-     matchLabels:
-       app: reviews
-       version: v2
-   template:
-     metadata:
-       labels:
-         app: reviews
-         version: v2
-     spec:
-       serviceAccountName: bookinfo-reviews
-       containers:
-         - name: reviews
-           image: docker.io/istio/examples-bookinfo-reviews-v2:1.16.4
-           imagePullPolicy: IfNotPresent
-           env:
-             - name: LOG_DIR
-               value: "/tmp/logs"
-           ports:
-             - containerPort: 9080
-           volumeMounts:
-             - name: tmp
-               mountPath: /tmp
-             - name: wlp-output
-               mountPath: /opt/ibm/wlp/output
-           securityContext:
-             runAsUser: 1000
-       volumes:
-         - name: wlp-output
-           emptyDir: {}
-         - name: tmp
-           emptyDir: {}
+  ports:
+    - port: 9080
+      name: http
+  selector:
+    app: productpage
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: ServiceAccount
 metadata:
-   name: reviews-v3
-   labels:
-     app: reviews
-     version: v3
-spec:
-   revisionHistoryLimit: 1
-   replicas: 1
-   selector:
-     matchLabels:
-       app: reviews
-       version: v3
-   template:
-     metadata:
-       labels:
-         app: reviews
-         version: v3
-     spec:
-       serviceAccountName: bookinfo-reviews
-       containers:
-         - name: reviews
-           image: docker.io/istio/examples-bookinfo-reviews-v3:1.16.4
-           imagePullPolicy: IfNotPresent
-           env:
-             - name: LOG_DIR
-               value: "/tmp/logs"
-           ports:
-             - containerPort: 9080
-           volumeMounts:
-             - name: tmp
-               mountPath: /tmp
-             - name: wlp-output
-               mountPath: /opt/ibm/wlp/output
-           securityContext:
-             runAsUser: 1000
-       volumes:
-         - name: wlp-output
-           emptyDir: {}
-         - name: tmp
-           emptyDir: {}
-
-##################################################################################################
-# productpage ServiceAccount
-##################################################################################################
-
+  name: bookinfo-productpage
+  labels:
+    account: productpage
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -240,7 +181,6 @@ metadata:
     app: productpage
     version: v1
 spec:
-  revisionHistoryLimit: 1
   replicas: 1
   selector:
     matchLabels:
@@ -248,6 +188,10 @@ spec:
       version: v1
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9080"
+        prometheus.io/path: "/metrics"
       labels:
         app: productpage
         version: v1
@@ -255,15 +199,13 @@ spec:
       serviceAccountName: bookinfo-productpage
       containers:
         - name: productpage
-          image: docker.io/istio/examples-bookinfo-productpage-v1:1.16.4
+          image: docker.io/istio/examples-bookinfo-productpage-v1:1.19.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9080
           volumeMounts:
             - name: tmp
               mountPath: /tmp
-          securityContext:
-            runAsUser: 1000
       volumes:
         - name: tmp
           emptyDir: {}

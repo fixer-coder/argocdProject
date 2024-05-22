@@ -22,7 +22,7 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/applicationset/maste
 kubectl apply -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml -n argocd
 
 # install cert manager
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.2/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.14.5/cert-manager.yaml
 
 # sleep for 30 sec
 sleep 30
@@ -31,6 +31,8 @@ sleep 30
 # Argocd password
 argocd_password=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo)
 
+# In new terminal
+kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 # login to argocd cli
 # shellcheck disable=SC2046
@@ -44,6 +46,5 @@ argocd login localhost:8080 --insecure --username admin --password "$argocd_pass
 echo "Argocd password is : $argocd_password"
 
 
-argocd repo add git@github.com:fixer-coder/argocdProject.git --ssh-private-key-path /c/Users/ugber/.ssh/id_ed25519_argocd
-
+argocd repo add git@github.com:fixer-coder/argocdProject.git --ssh-private-key-path ~/.ssh/id_ed25519_test_acct
 kubectl apply -k ~/Documents/argocdProject/ad-hoc-argo/argocd/argocd-server/.
