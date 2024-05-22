@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: bootstrap-hello-world
+  name: bootstrap-book-app
   namespace: argocd
 spec:
   destination:
@@ -9,6 +9,6 @@ spec:
     server: https://kubernetes.default.svc
   project: argocd
   source:
-    path: hello-world/bootstrap
+    path: book-app/bootstrap
     repoURL: git@github.com:fixer-coder/argocdProject.git
     targetRevision: master
