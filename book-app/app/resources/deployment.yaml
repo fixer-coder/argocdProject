@@ -166,13 +166,6 @@ spec:
   selector:
     app: productpage
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-productpage
-  labels:
-    account: productpage
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
