@@ -3,8 +3,8 @@
 # To start argocd server on my system
 
 # start minikube
-minikube start --memory=16384 --cpus=8 --vm-driver=vmware --disk-size=64g --network-plugin=cni --cni=calico --kubernetes-version=v1.20.2
-#
+##  minikube start --memory=16384 --cpus=8 --vm-driver=vmware --disk-size=64g --network-plugin=cni --cni=calico --kubernetes-version=v1.20.2
+minikube start --memory=16384 --cpus=8  --disk-size=64g --kubernetes-version=v1.26.0
 
 # create namespace argocd
 kubectl create namespace argocd
